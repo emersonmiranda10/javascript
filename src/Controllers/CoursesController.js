@@ -1,8 +1,8 @@
-const db = require('./../../db');
-// operação post: criar usuario
+const db = require('../../db');
+// operação post: criar cursos
 exports.post = (req, res, next) => { // req, res, next são atributos basicos de toda requisição
   const body = req.body
-    db("users").insert(body).then((data) => {
+    db("courses").insert(body).then((data) => {
     res.status(201).send({
       ...body,
       id: data,
@@ -11,36 +11,36 @@ exports.post = (req, res, next) => { // req, res, next são atributos basicos de
 }
 
 
-// operação put: altera um usuario
+// operação put: altera um cursos
 exports.put = async (req, res, next) => {
   let id = req.params.id;
-  await db('users').update(req.body).where({ id: id });
-  const updatedUser = await db('users').where({ id: id});
-  return res.status(200).json(...updatedUser);
+  await db('courses').update(req.body).where({ id: id });
+  const updatedCourse = await db('courses').where({ id: id});
+  return res.status(200).json(...updatedCourse);
 };
 
-// operação delete: deletar usuario
+// operação delete: deletar cursos
 exports.delete = (req, res, next) => {
     let id = req.params.id;
-    db('users').where({ id: id }).del().then(() => {
+    db('courses').where({ id: id }).del().then(() => {
         return res.status(200).json({ message: 'Deleted' });
     })
 };
 
-// operação get: retorna informação do usuario
+// operação get: retorna informação do cursos
 exports.get = (req, res, next) => {
-  db.select().table("users").then(data => {
+  db.select().table("courses").then(data => {
     res.status(200).send(data)
   })
 };
-// operação getByID: criar user by id
+// operação getByID: criar curso by id
 exports.getById = (req, res, next) => {
   let id = req.params.id;
-  db.select().table("users").where({
+  db.select().table("courses").where({
       id: id
   }).then((data) => {
       if(data.length == 0){
-          return res.status(400).json({ error: "user does not exist"});
+          return res.status(400).json({ error: "couse does not exist"});
         } else {
               res.status(200).send(data[0]);
           }
