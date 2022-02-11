@@ -3,6 +3,7 @@ const db = require('../../db');
 exports.post = (req, res, next) => { // req, res, next são atributos basicos de toda requisição
   const body = req.body
     db("courses").insert(body).then((data) => {
+      console.log(data)
     res.status(201).send({
       ...body,
       id: data,

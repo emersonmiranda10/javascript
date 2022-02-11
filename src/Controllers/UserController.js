@@ -1,11 +1,60 @@
 const db = require('./../../db');
+const jwt = require('jsonwebtoken');
+const bcrypt = require('bcrypt');
+
+//operçação para login
+exports.login = async (req, res, next) => {
+  const { email, senha } = req.body;
+
+  if (!email ||  !senha) return res.status(400).send({msg: 'Campo invalido'});
+
+  const user = await db('users')
+  .select('senha')
+  .where('email', email)
+  .first();
+
+  if (!user) return res.status(404).send({ error: 'User not found!' });
+
+  if (!await bcrypt.compareSync(senha, user.senha) ){
+    return res.status(401).send({ error: 'Invalid Password' })
+  }
+
+  const loggedUser = await db('users')
+      .select('*')
+      .where('email', email)
+      .first();
+
+  delete loggedUser.senha
+
+  const token = jwt.sign(
+    { user: loggedUser.id },
+    "segredo", {
+      expiresIn: 300
+    });
+
+    return res.status(200).send({ user: {...loggedUser}, token});
+}
+
+
 // operação post: criar usuario
-exports.post = (req, res, next) => { // req, res, next são atributos basicos de toda requisição
-  const body = req.body
-    db("users").insert(body).then((data) => {
+exports.post = async (req, res, next) => { // req, res, next são atributos basicos de toda requisição
+  const { body } = req;
+  const hash = await bcrypt.hashSync(body.senha, 10)
+  const userData = {
+      nome: body.nome,
+      sobrenome: body.sobrenome,
+      email: body.email,
+      telefone: body.telefone,
+      cpf: body.cpf,
+      senha: hash,
+    }
+    // const result = await bcrypt.compareSync(body.senha, hash) - comando para checar se a senha é igual ao hash
+    // const resultFalse = await bcrypt.compareSync("dsajlk", hash)
+
+    db("users").insert(userData).then((data) => {
     res.status(201).send({
-      ...body,
-      id: data,
+      ...userData,
+      id: data[0],
     });
   })
 }
@@ -13,7 +62,18 @@ exports.post = (req, res, next) => { // req, res, next são atributos basicos de
 
 // operação put: altera um usuario
 exports.put = async (req, res, next) => {
-  let id = req.params.id;
+  const id = req.params.id;
+  let userData = {
+    ...req.body
+  }
+  if (! await db("users").where("id", id).first()){
+    return  res.status(400).json({ error: "user does not exist"});
+  }
+  if (req.body.senha) {
+    const hash = await bcrypt.hashSync(req.body.senha, 10)
+    userData.senha = hash;
+  }
+
   await db('users').update(req.body).where({ id: id });
   const updatedUser = await db('users').where({ id: id});
   return res.status(200).json(...updatedUser);
@@ -21,8 +81,9 @@ exports.put = async (req, res, next) => {
 
 // operação delete: deletar usuario
 exports.delete = (req, res, next) => {
-    let id = req.params.id;
-    db('users').where({ id: id }).del().then(() => {
+    const id = req.params.id;
+    db('users').where({ id: id }).del().then(() => 
+    {
         return res.status(200).json({ message: 'Deleted' });
     })
 };
@@ -35,7 +96,7 @@ exports.get = (req, res, next) => {
 };
 // operação getByID: criar user by id
 exports.getById = (req, res, next) => {
-  let id = req.params.id;
+  const id = req.params.id;
   db.select().table("users").where({
       id: id
   }).then((data) => {
