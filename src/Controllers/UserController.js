@@ -1,6 +1,32 @@
 const db = require('./../../db');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
+const nodemailer = require('nodemailer');
+const { text } = require('body-parser');
+
+const transporter = nodemailer.createTransport({
+  host: "smtp.mailtrap.io",
+  port:2525,
+  auth: {
+    user: "1d26da31b6ee2c",
+    pass: "9cd8d108c9d033"
+  }
+});
+
+const mailOptions ={
+  from: 'exemplo@exemplo.com',
+  to: 'emerson.siilvaa10@gmail.com',
+  subject: 'Aula de Java Script',
+  text: 'Ola mundo!'
+}
+
+transporter.sendMail(mailOptions, (err, info) => {
+  if (err) {
+    return console.log(err)
+  }
+
+  console.log(info)
+})
 
 //operçação para login
 exports.login = async (req, res, next) => {
@@ -86,6 +112,7 @@ exports.delete = (req, res, next) => {
     {
         return res.status(200).json({ message: 'Deleted' });
     })
+    
 };
 
 // operação get: retorna informação do usuario
@@ -104,6 +131,6 @@ exports.getById = (req, res, next) => {
           return res.status(400).json({ error: "user does not exist"});
         } else {
               res.status(200).send(data[0]);
-          }
+        }
   })
 };

@@ -16,7 +16,8 @@
     "express": "^4.17.2",
     "jsonwebtoken": "^8.5.1",
     "knex": "^1.0.2",
-    "mysql2": "^2.3.3"
+    "mysql2": "^2.3.3",
+    "nodemailer": "^6.7.2"
   },
   "devDependencies": {
     "eslint": "^8.8.0",
