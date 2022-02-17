@@ -4,7 +4,7 @@ const bcrypt = require('bcrypt');
 const nodemailer = require('nodemailer');
 const { text } = require('body-parser');
 
-const transporter = nodemailer.createTransport({
+const transporter = nodemailer.createTransport({ // Configura os parametros de conexão com servidor
   host: "smtp.mailtrap.io",
   port:2525,
   auth: {
@@ -13,19 +13,18 @@ const transporter = nodemailer.createTransport({
   }
 });
 
-const mailOptions ={
+const mailOptions ={ // Define informações pertinentes ao email que será enviado
   from: 'exemplo@exemplo.com',
   to: 'emerson.siilvaa10@gmail.com',
   subject: 'Aula de Java Script',
   text: 'Ola mundo!'
 }
 
-transporter.sendMail(mailOptions, (err, info) => {
+transporter.sendMail(mailOptions, (err, info) => { //função que envia email
   if (err) {
     return console.log(err)
   }
 
-  console.log(info)
 })
 
 //operçação para login
