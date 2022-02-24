@@ -17,5 +17,8 @@ module.exports = (app) => {
    app.post('/courses/upload/:courseId/:lessonNumber', upload.single('video'), CoursesController.videoUpload);
    app.get('/courses/progress/:courseId/:userId', CoursesController.checkProgress);
    app.post('/courses/progress/:courseId/:userId', CoursesController.updateProgress);
+   app.get('/courses/status/:courseId/:userId', CoursesController.checkStatus);
+   app.post('/courses/status/:courseId/:userId', CoursesController.setCompleted);
+   app.post('/courses/add/:courseId/:userId', CoursesController.addToCourse);
    app.get('/courses/:courseId/:lessonNumber', CoursesController.getVideo);
 };

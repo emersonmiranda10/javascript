@@ -143,3 +143,57 @@ exports.updateProgress = async (req, res) => {
   }
   return res.status(200).send('progress updated');
 };
+
+
+
+exports.checkStatus = (req, res) => {
+  const { courseId, userId } = req.params;
+  const status = [
+    {
+      code: 0,
+      status: 'Não registrado',
+    },
+    {
+      code: 1,
+      status: 'cursando',
+    },
+    {
+      code: 2,
+      status: 'concluido',
+    },  
+  ];
+  db('course-status').where({ courseId, userId }).first().then((data) => {
+    if (!data) {
+      return res.status(200).send(status[0]);
+    }
+    return res.status(200).send(status[data.status]);
+  });
+};
+
+exports.addToCourse = async (req, res) => {
+  const { courseId, userId } = req.params;
+  const data = await db('course-status').where({ courseId, userId }).first();
+  // 1 - em processo / 2 concluido
+  if (!data) {
+    console.log('criado');
+    await db('course-status').insert({
+      courseId, userId, status: 1,
+    });
+  } else {
+    await db('course-status').where({ courseId, userId }).first().update({ status: 1 });
+  }
+  return res.status(200).send('user added to course');
+};
+
+exports.setCompleted = async (req, res) => {
+  const { courseId, userId } = req.params;
+  const { body } = req;
+  const data = await db('course-status').where({ courseId, userId }).first();
+  // 1 em progresso 2 concluido
+  if (!data) {
+    return res.status(400).json({ error: 'user not in this course' });
+  }
+
+  await db('course-status').where({ courseId, userId }).first().update({ completionDate: body.completionDate, status: 2 });
+  return res.status(200).send('course completed');
+};
