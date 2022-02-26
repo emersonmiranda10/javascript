@@ -1,4 +1,5 @@
 const fs = require ('fs');
+const pdf = require('html-pdf');
 const db = require('../../db');
 // operação post: criar cursos
 exports.post = (req, res) => { // req, res, next são atributos basicos de toda requisição
@@ -196,4 +197,34 @@ exports.setCompleted = async (req, res) => {
 
   await db('course-status').where({ courseId, userId }).first().update({ completionDate: body.completionDate, status: 2 });
   return res.status(200).send('course completed');
+};
+
+exports.generatePDF = async (req, res) => {
+  const { courseId, userId } = req.params;
+  const course = await db.select().table('courses').where({
+    id: courseId,
+  }).first();
+  const user = await db.select().table('users').where({
+    id: userId,
+  }).first();
+  const html = `
+  <div style='position: absolute; height: 50%; width: 100%; top: 25%; right: 0'>
+    <h4 style='font-size: 62px;text-align: center'>HITSS ON</h4>
+    <h1 style='font-size: 48px;text-align: center'>Certificado</h1>
+    <h2 style='font-size: 32px;text-align: center'>${user.nome} ${user.sobrenome}</h2>
+    <h3 style='font-size: 28px;text-align: center'>Concluiu o curso ${course.title}</h3>
+  </div>
+  `;
+
+  const options = {
+    type: 'pdf',
+    format: 'A4',
+    orientation: 'landscape',
+  };
+
+  pdf.create(html, options).toBuffer((err, buffer) => {
+    if (err) return res.status(500).json(err);
+
+    return res.end(buffer);
+  });
 };

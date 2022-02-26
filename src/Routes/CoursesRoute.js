@@ -20,5 +20,6 @@ module.exports = (app) => {
    app.get('/courses/status/:courseId/:userId', CoursesController.checkStatus);
    app.post('/courses/status/:courseId/:userId', CoursesController.setCompleted);
    app.post('/courses/add/:courseId/:userId', CoursesController.addToCourse);
+   app.get('/courses/certificate/:courseId/:userId', CoursesController.generatePDF);
    app.get('/courses/:courseId/:lessonNumber', CoursesController.getVideo);
 };
